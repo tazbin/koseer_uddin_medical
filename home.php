@@ -4,6 +4,8 @@ $page = "home";
   include 'inc/header.php';
   include 'inc/sidebar.php'; //sidebar menu
   include 'inc/top-nav.php'; //more option section
+  include 'lib/patient.php';
+  $patient = new patient();
  ?>
 
         <!-- page content -->
@@ -20,29 +22,64 @@ $page = "home";
               </div>
               <div class="x_content">
                 <br />
-                <form id="demo-form2" data-parsley-validate class="form-horizontal form-label-left">
 
-                  <div class="form-group">
-                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Patient ID <span class="required">*</span>
+                <?php
+                  if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add'])) {
+                    $patient->addPatient($_POST);
+                    $name = $_POST['name'];
+                    $age = $_POST['age'];
+                    $phone = $_POST['phone'];
+                    $gender = $_POST['gender'];
+                    $referred_by = $_POST['referred_by'];
+                    $doctor_name = $_POST['doctor_name'];
+                    $intensive = $_POST['intensive'];
+                    $doctor_fee = $_POST['doctor_fee'];
+                  }
+
+                  if (session::get('reset') == true) {
+                    $name = '';
+                    $age = '';
+                    $phone = '';
+                    $gender = 'male';
+                    $referred_by = '';
+                    $doctor_name = '';
+                    $intensive = '';
+                    $doctor_fee = '';
+                    session::set('reset', false);
+                  } else{
+                    if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add'])) {
+                      $gender = $_POST['gender'];
+                    } else{
+                      $gender = 'male';
+                    }
+                  }
+
+                 ?>
+
+                <form id="demo-form2" action="" method="POST" data-parsley-validate class="form-horizontal form-label-left">
+
+                  <!-- <div class="form-group">
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Patient ID <span class="0">*</span>
                     </label>
                     <div class="col-md-6 col-sm-6 col-xs-12">
-                      <input type="number" id="first-name" required="required" value="2145" disabled class="form-control col-md-7 col-xs-12">
+                      <input type="" id="first-name" required="required" value="2145" disabled class="form-control col-md-7 col-xs-12">
+                    </div>
+                  </div> -->
+
+                  <div class="form-group">
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Name <span class="0">*</span>
+                    </label>
+                    <div class="col-md-6 col-sm-6 col-xs-12">
+                      <input type="text" name="name" value="<?php echo isset($name)? $name: ''; ?>" id="first-name" required="required" class="form-control col-md-7 col-xs-12">
                     </div>
                   </div>
 
                   <div class="form-group">
-                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Name <span class="required">*</span>
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="last-name">Age <span class="0">*</span>
                     </label>
                     <div class="col-md-6 col-sm-6 col-xs-12">
-                      <input type="text" id="first-name" required="required" class="form-control col-md-7 col-xs-12">
-                    </div>
-                  </div>
-
-                  <div class="form-group">
-                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="last-name">Age <span class="required">*</span>
-                    </label>
-                    <div class="col-md-6 col-sm-6 col-xs-12">
-                      <input type="number" id="last-name" name="last-name" required="required" class="form-control col-md-7 col-xs-12">
+                      <input type="number" name="age" value="<?php echo isset($age)? $age: ''; ?>" id="last-name" name="last-name" required="required" class="form-control col-md-7 col-xs-12">
+                      <?php $patient->age_err(); ?>
                     </div>
                   </div>
 
@@ -53,59 +90,63 @@ $page = "home";
                     <div class="col-md-9 col-sm-9 col-xs-12">
                       <div class="radio">
                         <label>
-                          <input type="radio" class="flat" checked name="iCheck"> Male
+                          <input type="radio" class="flat" value="male" <?php echo $gender=='male'? 'checked': ''; ?> name="gender"> Male
                         </label>
                       </div>
                       <div class="radio">
                         <label>
-                          <input type="radio" class="flat" name="iCheck"> Female
+                          <input type="radio" class="flat" value="female" <?php echo $gender=='female'? 'checked': ''; ?> name="gender"> Female
                         </label>
                       </div>
                       <div class="radio">
                         <label>
-                          <input type="radio" class="flat" name="iCheck"> Others
+                          <input type="radio" class="flat" value="other" <?php echo $gender=='other'? 'checked': ''; ?> name="gender"> Other
                         </label>
                       </div>
+                      <?php $patient->gender_err(); ?>
                     </div>
                   </div>
 
                   <div class="form-group">
-                    <label class="control-label col-md-3 col-sm-3 col-xs-12">Mobile No. <span class="required">*</span>
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12">Phone No. <span class="0">*</span>
                     </label>
                     <div class="col-md-6 col-sm-6 col-xs-12">
-                      <input id="birthday" class="date-picker form-control col-md-7 col-xs-12" required="required" type="number">
+                      <input id="birthday" type="number" value="<?php echo isset($phone)? $phone: ''; ?>" name="phone" class="date-picker form-control col-md-7 col-xs-12" required="required">
+                      <?php $patient->phone_err(); ?>
                     </div>
                   </div>
 
                   <div class="form-group">
-                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="last-name">Referred By <span class="required">*</span>
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="last-name">Referred By <span class="0">*</span>
                     </label>
                     <div class="col-md-6 col-sm-6 col-xs-12">
-                      <input type="text" id="last-name" name="last-name" required="required" class="form-control col-md-7 col-xs-12">
+                      <input type="text" name="referred_by" value="<?php echo isset($referred_by)? $referred_by: ''; ?>" id="last-name" name="last-name" required="required" class="form-control col-md-7 col-xs-12">
                     </div>
                   </div>
 
                   <div class="form-group">
-                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="last-name">Intensive <span class="required">*</span>
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="last-name">Intensive <span class="0">*</span>
                     </label>
                     <div class="col-md-6 col-sm-6 col-xs-12">
-                      <input type="number" id="last-name" name="last-name" required="required" class="form-control col-md-7 col-xs-12">
+                      <input type="number" name="intensive" value="<?php echo isset($intensive)? $intensive: ''; ?>" id="last-name" name="last-name" required="required" class="form-control col-md-7 col-xs-12">
+                      <?php $patient->intensive_err(); ?>
                     </div>
                   </div>
 
                   <div class="form-group">
-                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="last-name">Doctor's name <span class="required">*</span>
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="last-name">Doctor's name <span class="0">*</span>
                     </label>
                     <div class="col-md-6 col-sm-6 col-xs-12">
-                      <input type="text" id="last-name" name="last-name" required="required" class="form-control col-md-7 col-xs-12">
+                      <input type="text" name="doctor_name" value="<?php echo isset($doctor_name)? $doctor_name: ''; ?>" id="last-name" name="last-name" required="required" class="form-control col-md-7 col-xs-12">
                     </div>
                   </div>
 
                   <div class="form-group">
-                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="last-name">Doctor's fee <span class="required">*</span>
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="last-name">Doctor's fee <span class="0">*</span>
                     </label>
                     <div class="col-md-6 col-sm-6 col-xs-12">
-                      <input type="number" id="last-name" name="last-name" required="required" class="form-control col-md-7 col-xs-12">
+                      <input type="number" name="doctor_fee" value="<?php echo isset($doctor_fee)? $doctor_fee: ''; ?>" id="last-name" name="last-name" required="required" class="form-control col-md-7 col-xs-12">
+                      <?php $patient->doctor_fee_err(); ?>
                     </div>
                   </div>
 
@@ -113,7 +154,7 @@ $page = "home";
                   <div class="form-group">
                     <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3" style="margin-top: -10px;">
                       <!-- <button class="btn btn-primary" type="button">Cancel</button> -->
-                      <button type="submit" class="btn btn-success" style="min-width: 275px; margin-top: 10px;">Add & print Patient</button>
+                      <button type="submit" name="add" class="btn btn-success" style="min-width: 275px; margin-top: 10px;">Add Patient</button>
                         <button class="btn btn-primary" type="reset" style="margin-top: 10px;">Clear</button>
                     </div>
                   </div>
